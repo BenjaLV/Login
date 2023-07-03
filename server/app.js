@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 
 //Routes modules
 import AuthRoutes from "./routes/auth.routes.js";
-
+import UserRoutes from "./routes/user.routes.js"
 //Initializations
 const app = express();
 
@@ -15,5 +15,7 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api", AuthRoutes);
+app.use("/api", UserRoutes);
+
 
 export default app;
