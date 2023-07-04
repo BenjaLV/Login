@@ -5,6 +5,8 @@ import cookieParser from "cookie-parser";
 //Routes modules
 import AuthRoutes from "./routes/auth.routes.js";
 import UserRoutes from "./routes/user.routes.js"
+import MovieRoutes from './routes/movies.routes.js'
+import ListRoutes from './routes/lists.routes.js'
 //Initializations
 const app = express();
 
@@ -16,6 +18,8 @@ app.use(cookieParser());
 // Routes
 app.use("/api", AuthRoutes);
 app.use("/api", UserRoutes);
+app.use("/api", MovieRoutes);
+app.use("/api", ListRoutes);
 
 
 export default app;
