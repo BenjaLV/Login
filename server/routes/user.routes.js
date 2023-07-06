@@ -1,11 +1,14 @@
 import { Router } from "express";
-import { deleteUser, updateUser } from "../controllers/users.controllers.js";
+import { addToLikedMovies, getLikedMovies, removeFromLikedMovies} from '../controllers/users.controllers.js'
+
 import { authRequired } from "../middlewares/validateToken.js";
 
 const router = Router();
 
-router.put("/user/:id", authRequired, updateUser);
+router.get("/liked/:email", getLikedMovies);
 
-router.delete("/user/:id", authRequired, deleteUser);
+router.post("/add", addToLikedMovies);
+
+router.put("/remove", removeFromLikedMovies);
 
 export default router;

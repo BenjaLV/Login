@@ -3,12 +3,12 @@ import bcrypt from "bcryptjs";
 import { createAccessToken } from "../libs/jwt.js";
 
 export const register = async (req, res) => {
-  const { email, password, username } = req.body;
+  const { email, password } = req.body;
+  console.log(req.body);
 
   try {
     const passwordHash = await bcrypt.hash(password, 10);
     const newUser = new User({
-      username,
       email,
       password: passwordHash,
     });
@@ -19,7 +19,6 @@ export const register = async (req, res) => {
 
     res.json({
       id: userSaved.id,
-      username: userSaved.username,
       email: userSaved.email,
       createAt: userSaved.createdAt,
       updatedAt: userSaved.updatedAt,
@@ -65,15 +64,21 @@ export const logout = (req, res) => {
 };
 
 export const profile = async (req, res) => {
-  const userFound = await User.findById(req.user.id);
+  
+  const {id} = req.body
+  console.log(id);
+  const userFound = await User.findById(id);
 
   if (!userFound) return res.status(400).json({ message: "User not found" });
-
+  console.log('entre acá');
+  const userFavorites = userFound.likedMovies; 
+  console.log('aca');
   return res.json({
     id: userFound._id,
     username: userFound.username,
     email: userFound.email,
     createAt: userFound.createAt,
     updatedAt: userFound.updatedAt,
+    favorites: userFavorites, 
   });
 };

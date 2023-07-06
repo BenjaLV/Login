@@ -1,43 +1,61 @@
 import User from "../models/user.model.js";
-import bcrypt from "bcryptjs";
 
-export const updateUser = async (req, res) => {
-  if (req.user.id === req.params.id || req.user.isAdmin) {
-    if (req.body.password) {
-      // Genera un hash de la nueva contraseña
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
-      // Actualiza la contraseña en el cuerpo de la solicitud
-      req.body.password = hashedPassword;
-    }
-
-    try {
-      const updatedUser = await User.findByIdAndUpdate(
-        req.params.id,
-        {
-          $set: req.body,
-        },
-        { new: true }
-      );
-      res.status(200).json(updatedUser);
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  } else {
-    res.status(403).json("You can only updated you account!");
+export const getLikedMovies = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const user = await await User.findOne({ email });
+    if (user) {
+      return res.json({ msg: "success", movies: user.likedMovies });
+    } else return res.json({ msg: "User with given email not found." });
+  } catch (error) {
+    return res.json({ msg: "Error fetching movies." });
   }
 };
 
-export const deleteUser = async (req, res) => {
-  if (req.user.id === req.params.id || req.user.isAdmin) {
-    try {
-      await User.findByIdAndDelete(req.params.id);
-      res.status(200).json("User has been deleted...");
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  } else {
-    res.status(403).json("You can delete only your account!");
+export const addToLikedMovies = async (req, res) => {
+  try {
+    const { email, data } = req.body;
+    const user = await await User.findOne({ email });
+    if (user) {
+      const { likedMovies } = user;
+      const movieAlreadyLiked = likedMovies.find(({ id }) => id === data.id);
+      if (!movieAlreadyLiked) {
+        await User.findByIdAndUpdate(
+          user._id,
+          {
+            likedMovies: [...user.likedMovies, data],
+          },
+          { new: true }
+        );
+      } else return res.json({ msg: "Movie already added to the liked list." });
+    } else await User.create({ email, likedMovies: [data] });
+    return res.json({ msg: "Movie successfully added to liked list." });
+  } catch (error) {
+    return res.json({ msg: "Error adding movie to the liked list" });
+  }
+};
+
+export const removeFromLikedMovies = async (req, res) => {
+  try {
+    const { email, movieId } = req.body;
+    const user = await User.findOne({ email });
+    if (user) {
+      const movies = user.likedMovies;
+      const movieIndex = movies.findIndex(({ id }) => id === movieId);
+      if (!movieIndex) {
+        res.status(400).send({ msg: "Movie not found." });
+      }
+      movies.splice(movieIndex, 1);
+      await User.findByIdAndUpdate(
+        user._id,
+        {
+          likedMovies: movies,
+        },
+        { new: true }
+      );
+      return res.json({ msg: "Movie successfully removed.", movies });
+    } else return res.json({ msg: "User with given email not found." });
+  } catch (error) {
+    return res.json({ msg: "Error removing movie to the liked list" });
   }
 };
